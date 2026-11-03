@@ -1,0 +1,12 @@
+# Tajné údaje (Wi-Fi heslo, Discord webhook)
+secrets.h
+
+# Systémové a editorové súbory
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+
+# Build súbory (ak niekedy použiješ PlatformIO alebo Arduino IDE)
+.pio/
+build/
