@@ -1,5 +1,5 @@
 // ============================================================
-// Smart Bedroom Climate Control - Fáza 3 (Wi-Fi + Discord)
+// Smart Bedroom Climate Control - 
 // ESP32 + DHT22 + LDR + PIR + LCD 1602 I2C
 // ============================================================
 #include <Arduino.h>
@@ -52,7 +52,7 @@ const unsigned long DEBOUNCE_MS         = 40;
 const unsigned long SCREEN_ROTATE_MS    = 4000;
 
 // --- Wi-Fi a Discord ---
-#define DISCORD_DRY_RUN 1                 // 1 = len výpis do Serial Monitora, 0 = skutočné odosielanie
+#define DISCORD_DRY_RUN 0                 // 1 = len výpis do Serial Monitora, 0 = skutočné odosielanie
 const unsigned long WIFI_RETRY_MS     = 15000;
 const unsigned long LONG_HIGH_MS      = 120000;  // "dlhodobo vysoká teplota" (2 min, na test)
 const int           DISCORD_QUEUE_LEN = 8;
@@ -60,7 +60,7 @@ const int           DISCORD_MAX_TRIES = 3;
 const unsigned long DISCORD_RETRY_MS  = 5000;
 const char* TZ_INFO = "CET-1CEST,M3.5.0,M10.5.0/3";   // časová zóna Slovensko
 
-// Typy upozornení: zapnuté/vypnuté a cooldown (ms) pre každý typ
+// Typy upozornení: zapnuté/vypnuté 
 enum EventType {
   EV_STARTUP, EV_TEMP_HIGH, EV_TEMP_OK, EV_CRITICAL, EV_HUM_BAD, EV_HUM_OK,
   EV_FAN, EV_MOTION, EV_SENSOR_ERR, EV_SENSOR_OK, EV_LONG_HIGH, EV_COUNT
@@ -125,8 +125,7 @@ bool buttonPressed(Button &b) {
 }
 
 // ===================== POMOCNÉ FUNKCIE (DISCORD) ============
-// Escapuje text pre JSON (úvodzovky, backslash, nový riadok).
-// UTF-8 znaky (slovenská diakritika, emoji) prejdú nezmenené.
+
 void jsonEscape(const char* src, char* dst, size_t n) {
   size_t j = 0;
   for (size_t i = 0; src[i] && j + 7 < n; i++) {
@@ -166,18 +165,18 @@ void notify(EventType type, const char* fmt, ...) {
   if (xQueueSend(discordQueue, &m, 0) == pdTRUE) {
     lastSent[type] = (now == 0) ? 1 : now;
   } else {
-    droppedMsgs++;   // fronta plná
+    droppedMsgs++;   
   }
 }
 
-// Jedno HTTPS POST volanie na Discord webhook. URL sa nikdy nevypisuje.
+// Jedno HTTPS POST volanie na Discord webhook
 bool postToDiscord(const char* text) {
   char esc[420];
   jsonEscape(text, esc, sizeof(esc));
   String payload = String("{\"username\":\"Smart Bedroom\",\"content\":\"") + esc + "\"}";
 
   WiFiClientSecure client;
-  client.setInsecure();            // bez overenia certifikátu (zjednodušenie, pozri dokumentáciu)
+  client.setInsecure();            
   HTTPClient http;
   http.setTimeout(5000);
   if (!http.begin(client, DISCORD_WEBHOOK_URL)) return false;
@@ -185,7 +184,7 @@ bool postToDiscord(const char* text) {
   int code = http.POST(payload);
   http.end();
   Serial.printf("Discord HTTP kod: %d\n", code);
-  return code == 200 || code == 204;   // Discord vracia 204 No Content
+  return code == 200 || code == 204;   
 }
 
 // Samostatná úloha: berie správy z fronty a odosiela ich po jednej.
@@ -309,29 +308,29 @@ void handleDiscordNotifications() {
   // Chyba senzora a jeho obnovenie
   if (sensorError && !nSensorErr) {
     nSensorErr = true;
-    notify(EV_SENSOR_ERR, "❗ Chyba senzora DHT22 – žiadne platné dáta. Ventilátor je zapnutý (fail-safe).");
+    notify(EV_SENSOR_ERR, " Chyba senzora DHT22 – žiadne platné dáta. Ventilátor je zapnutý (fail-safe).");
   } else if (!sensorError && nSensorErr) {
     nSensorErr = false;
-    notify(EV_SENSOR_OK, "✅ Senzor DHT22 opäť funguje.");
+    notify(EV_SENSOR_OK, " Senzor DHT22 opäť funguje.");
   }
 
   if (!sensorError && !isnan(temperature) && !isnan(humidity)) {
     // Vysoká teplota (hranice rovnaké ako pre ventilátor)
     if (!nTempHigh && temperature >= TEMP_FAN_ON) {
       nTempHigh = true; nTempHighSince = now;
-      notify(EV_TEMP_HIGH, "🔥 Vysoká teplota: %.1f °C (limit %.1f °C).", temperature, TEMP_FAN_ON);
+      notify(EV_TEMP_HIGH, " Vysoká teplota: %.1f °C (limit %.1f °C).", temperature, TEMP_FAN_ON);
     } else if (nTempHigh && temperature <= TEMP_FAN_OFF) {
       nTempHigh = false;
-      notify(EV_TEMP_OK, "✅ Teplota sa vrátila do normy: %.1f °C.", temperature);
+      notify(EV_TEMP_OK, " Teplota sa vrátila do normy: %.1f °C.", temperature);
     }
     // Dlhodobo vysoká teplota (opakovanie riadi cooldown)
     if (nTempHigh && now - nTempHighSince >= LONG_HIGH_MS) {
-      notify(EV_LONG_HIGH, "⏱️ Teplota je dlhodobo vysoká: %.1f °C.", temperature);
+      notify(EV_LONG_HIGH, " Teplota je dlhodobo vysoká: %.1f °C.", temperature);
     }
     // Kritický stav
     if (!nCritical && temperature >= TEMP_CRIT) {
       nCritical = true;
-      notify(EV_CRITICAL, "🚨 KRITICKÝ STAV: teplota %.1f °C.", temperature);
+      notify(EV_CRITICAL, " KRITICKÝ STAV: teplota %.1f °C.", temperature);
     } else if (nCritical && temperature <= TEMP_CRIT - CRIT_HYST) {
       nCritical = false;
     }
@@ -340,19 +339,19 @@ void handleDiscordNotifications() {
     bool humBack = (humidity >= HUM_MIN + HUM_HYST && humidity <= HUM_MAX - HUM_HYST);
     if (!nHumBad && humOut) {
       nHumBad = true;
-      notify(EV_HUM_BAD, "💧 Vlhkosť mimo rozsahu: %.0f %% (povolené %.0f–%.0f %%).", humidity, HUM_MIN, HUM_MAX);
+      notify(EV_HUM_BAD, " Vlhkosť mimo rozsahu: %.0f %% (povolené %.0f–%.0f %%).", humidity, HUM_MIN, HUM_MAX);
     } else if (nHumBad && humBack) {
       nHumBad = false;
-      notify(EV_HUM_OK, "✅ Vlhkosť sa vrátila do normy: %.0f %%.", humidity);
+      notify(EV_HUM_OK, " Vlhkosť sa vrátila do normy: %.0f %%.", humidity);
     }
   }
 
   // Zmena stavu ventilátora
   if (fanOn != nFan) {
     nFan = fanOn;
-    notify(EV_FAN, fanOn ? "🌀 Ventilátor ZAPNUTÝ (%.1f °C)." : "🌀 Ventilátor VYPNUTÝ (%.1f °C).", temperature);
+    notify(EV_FAN, fanOn ? " Ventilátor ZAPNUTÝ (%.1f °C)." : " Ventilátor VYPNUTÝ (%.1f °C).", temperature);
   }
-  // Pohyb (voliteľné, predvolene vypnuté v NOTIFY_ENABLED)
+  // Pohyb 
   if (motion && !nMotion) notify(EV_MOTION, "🚶 Zaznamenaný pohyb v miestnosti.");
   nMotion = motion;
 }
@@ -434,16 +433,16 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcdCache[0][0] = lcdCache[1][0] = '\0';
-  lcdLine(0, "Smart Bedroom");
+  lcdLine(0, "Climate Control");
   lcdLine(1, "Spustam...");
 
-  // Fronta a úloha pre Discord (musí byť pred prvým notify)
+  
   discordQueue = xQueueCreate(DISCORD_QUEUE_LEN, sizeof(DiscordMsg));
   xTaskCreatePinnedToCore(discordTask, "discord", 10240, NULL, 1, NULL, 0);
 
   connectWiFi();
   lastGoodDht = millis();
-  notify(EV_STARTUP, "✅ Smart Bedroom Climate Control sa spustil.");
+  notify(EV_STARTUP, "Climate Control sa spustil.");
   delay(1500);
 }
 
