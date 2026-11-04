@@ -4,7 +4,7 @@
 
 Projekt stredoškolskej odbornej činnosti (SOČ). Mikrokontrolér ESP32 meria teplotu, vlhkosť, osvetlenie a pohyb, zobrazuje hodnoty na LCD, automaticky riadi ventilátor a svetlo a pripravuje upozornenia na Discord.
 
-Projekt je vytvorený a testovaný v simulátore **Wokwi**. Nie je to fyzicky zostavené zariadenie.
+Projekt je vytvorený a testovaný v simulátore **Wokwi**. 
 
 Wokwi projekt: https://wokwi.com/projects/479602791671279617 (pozor, odkaz zobrazuje aj `secrets.h`, pozri časť Bezpečnosť)
 
@@ -101,8 +101,8 @@ Webhook URL funguje ako heslo: kto ju má, môže písať do kanála. Súbor `se
 |---|---|
 | Čítanie senzorov, LCD, ventilátor, svetlo, stavové LED, tlačidlá | PASS (Wokwi simulátor) |
 | Pripojenie na Wi-Fi (`Wokwi-GUEST`) | PASS (Wokwi simulátor) |
-| Logika upozornení v režime DRY-RUN (zmena stavu, cooldown, texty, fronta) | PASS (Wokwi simulátor), okrem testov s dlhým čakaním |
-| Upozornenie na dlhodobo vysokú teplotu a opakovanie po cooldowne | NOT TESTED (testy s dlhým čakaním) |
+| Logika upozornení v režime DRY-RUN (zmena stavu, cooldown, texty, fronta) | PASS (Wokwi simulátor) |
+| Upozornenie na dlhodobo vysokú teplotu a opakovanie po cooldowne | NOT TESTED |
 | Všeobecné HTTPS spojenie zo simulátora (`https://www.example.com`) | PASS (HTTP kód 200) |
 | Skutočné odoslanie na Discord cez HTTPS zo simulátora | **FAIL**: spojenie na `discord.com` skončilo chybou `-1 (connection refused)` |
 | Správanie pri výpadku a obnovení Wi-Fi | NOT TESTED |
@@ -145,4 +145,4 @@ Wi-Fi aj HTTPS spojenie vo Wokwi teda fungujú, ale spojenie na Discord je odmie
 - DHT sensor library
 - Adafruit Unified Sensor
 - LiquidCrystal I2C
-- WiFi, WiFiClientSecure, HTTPClient (súčasť ESP32 Arduino core)
+- WiFi, WiFiClientSecure, HTTPClient 
