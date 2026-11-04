@@ -6,7 +6,7 @@ Projekt stredoškolskej odbornej činnosti (SOČ). Mikrokontrolér ESP32 meria t
 
 Projekt je vytvorený a testovaný v simulátore **Wokwi**. 
 
-Wokwi projekt: https://wokwi.com/projects/479602791671279617 (pozor, odkaz zobrazuje aj `secrets.h`, pozri časť Bezpečnosť)
+Wokwi projekt: https://wokwi.com/projects/479602791671279617 
 
 ## Čo systém robí
 
@@ -33,7 +33,7 @@ Wokwi projekt: https://wokwi.com/projects/479602791671279617 (pozor, odkaz zobra
 | LED zelená, žltá, červená | stavová indikácia |
 | 5× rezistor 220 Ω | predradné rezistory LED |
 
-Vo Wokwi neexistuje komponent ventilátora, preto ho simuluje modrá LED. V reálnom zapojení by sa ventilátor a svetlo spínali cez relé alebo tranzistor.
+Vo Wokwi neexistuje komponent ventilátora, preto ho simuluje modrá LED.
 
 ## Zapojenie pinov
 
@@ -47,7 +47,7 @@ Vo Wokwi neexistuje komponent ventilátora, preto ho simuluje modrá LED. V reá
 | LED ventilátor / svetlo | 26 / 25 |
 | LED zelená / žltá / červená | 16 / 17 / 18 |
 
-Tlačidlá sú zapojené medzi GPIO a GND (interný pull-up). Každá LED má sériový rezistor 220 Ω. Presné zapojenie je v `diagram.json`.
+Tlačidlá sú zapojené medzi GPIO a GND (interný pull-up). Každá LED má sériový rezistor 220 Ω. 
 
 ## Ovládanie
 
@@ -59,16 +59,6 @@ Tlačidlá sú zapojené medzi GPIO a GND (interný pull-up). Každá LED má s�
 
 V režime MANUAL automatika neprepisuje ručné príkazy.
 
-## Ako otvoriť a spustiť vo Wokwi
-
-1. Na [wokwi.com](https://wokwi.com) vytvor nový projekt **ESP32**.
-2. Obsah `diagram.json` z tohto repozitára vlož do záložky `diagram.json`.
-3. Obsah `libraries.txt` vlož do záložky `libraries.txt`.
-4. Obsah `sketch.ino` vlož do záložky `sketch.ino`.
-5. Vytvor nový súbor `secrets.h` podľa `secrets.example.h`.
-6. Klikni na **Start** a otvor Serial Monitor.
-
-Hodnoty senzorov meníš kliknutím na súčiastku vo Wokwi (teplota a vlhkosť DHT22, úroveň svetla LDR, simulácia pohybu PIR).
 
 ## Discord upozornenia
 
@@ -77,23 +67,7 @@ Správy sa posielajú cez Discord webhook. V `sketch.ino` sú dva režimy:
 - `#define DISCORD_DRY_RUN 1` (predvolené): správy sa len vypisujú do Serial Monitora s predponou `[DRY-RUN]`, nič sa neodosiela.
 - `#define DISCORD_DRY_RUN 0`: správy sa odosielajú na webhook cez HTTPS.
 
-### Nastavenie webhooku (pre skutočné odosielanie)
 
-1. V Discorde: nastavenia kanála → **Integrácie → Webhooky → Nový webhook → Kopírovať URL**.
-2. Skopíruj `secrets.example.h` ako `secrets.h` a doplň svoje údaje:
-   ```cpp
-   #define WIFI_SSID     "Wokwi-GUEST"
-   #define WIFI_PASSWORD ""
-   #define WIFI_CHANNEL  6
-   #define DISCORD_WEBHOOK_URL "https://discord.com/api/webhooks/..."
-   ```
-   Pri reálnej Wi-Fi sieti nastav vlastné SSID a heslo a `WIFI_CHANNEL 0`.
-3. V `sketch.ino` nastav `DISCORD_DRY_RUN` na `0`.
-4. Pre upozornenia v mobile nechaj v aplikácii Discord zapnuté notifikácie pre daný kanál.
-
-### Bezpečnosť
-
-Webhook URL funguje ako heslo: kto ju má, môže písať do kanála. Súbor `secrets.h` je v `.gitignore` a nesmie sa dostať do repozitára. Ak sa webhook niekde zverejní, zmaž ho v Discorde a vytvor nový. Pri zdieľaní Wokwi projektu odkazom nechaj v `secrets.h` falošnú URL.
 
 ## Čo je overené a čo nie
 
